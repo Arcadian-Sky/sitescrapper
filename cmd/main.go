@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"strings"
 
 	"github.com/Arcadian-Sky/scrapper/internal/models"
@@ -14,7 +13,7 @@ import (
 )
 
 func main() {
-	domain := "mekka.spb.ru"
+	domain := "site"
 
 	// Инициализируем подключение к ClickHouse
 	ch, err := storage.NewClickHouseStorage("localhost", "9000", "scrapper", "admin", "admin123")
@@ -22,20 +21,6 @@ func main() {
 		log.Fatal(err)
 	}
 	defer ch.Close()
-
-	product := models.Product{
-		Name:        "1111",
-		Description: "2222",
-		Price:       "3333",
-		URL:         "4444",
-	}
-	fmt.Printf("Найден товар: %+v\n", product)
-
-	// Сохраняем товар в ClickHouse
-	if err := ch.SaveProduct(context.Background(), product); err != nil {
-		log.Printf("Ошибка сохранения товара в ClickHouse: %v", err)
-	}
-	os.Exit(0)
 
 	// Парсим robots.txt
 	robots, err := scrapper.ParseRobotsTxt(domain)
