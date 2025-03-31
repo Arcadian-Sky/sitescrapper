@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  clickhouse:
+    build:
+      context: .
+      dockerfile: docker/clickhouse/Dockerfile
+    ports:
+      - "9000:9000" # HTTP порт
+      - "8123:8123" # HTTP интерфейс
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      # - ./docker/clickhouse/users.xml:/etc/clickhouse-server/users.xml
+    environment:
+      - CLICKHOUSE_USER=admin
+      - CLICKHOUSE_PASSWORD=admin123
+      - CLICKHOUSE_DB=scrapper
+    healthcheck:
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8123/ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  tabix:
+    image: spoonest/clickhouse-tabix-web-client
+    ports:
+      - "8080:80"
+    environment:
+      - CH_HOST=clickhouse
+      - CH_PORT=8123
+      - CH_USER=admin
+      - CH_PASSWORD=admin123
+    depends_on:
+      - clickhouse
+
+volumes:
+  clickhouse_data:
